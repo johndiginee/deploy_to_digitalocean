@@ -38,12 +38,6 @@ jobs:
        - name: Checkout code
          uses: actions/checkout@v2
 
-
-        # Define environment variables here
-       - name: Set Environment Variables
-         run: |
-           echo "DEBUG=False" >> $GITHUB_ENV
-
        - name: DigitalOcean App Platform deployment
          uses: digitalocean/app_action@v1.1.5 # This is the action
          with:
