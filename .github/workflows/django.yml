@@ -1,49 +1,46 @@
-name: Deploy Django App to DigitalOcean App Platform
+name: Django Github Action
 
-on:
-  push:
-    branches:
-      - master  # Adjust to your main branch name
+on: push
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 2
+      matrix:
+        python-version: [3.x]
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up Python
-        uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - name: Set Python Version ${{ matrix.python-version }}
+        uses: actions/setup-python@v4.7.0
         with:
-          python-version: 3.x  # Adjust the Python version as needed
-
+          python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
-
+      # - name: Lint with flake8
+      #   run: |
+      #     flake8 .
       - name: Run migrations
         run: |
           python manage.py migrate
-
-      - name: Deploy to DigitalOcean App Platform
+      - name: Runing the tests
         run: |
-          curl -X POST "https://api.digitalocean.com/v2/apps/$DO_APP_NAME/deployments" \
-            -H "Authorization: Bearer $DO_API_TOKEN" \
-            -H "Content-Type: application/json" \
-            --data '{
-              "force_build": true
-            }'
-        env:
-          DO_API_TOKEN: ${{ secrets.DO_API_TOKEN }}
-          DO_APP_NAME: deploy_to_digitalocean
+          python manage.py test
+  
+  deploy:
+    runs-on: ubuntu-latest
+    name: deploy our django application to heroku
+    needs: [build]
+    steps:
+       - name: Checkout code
+         uses: actions/checkout@v2
 
-      - name: Check deployment status
-        run: |
-          sleep 10  # Wait for the deployment to finish (you can adjust the wait time)
-          curl -X GET "https://api.digitalocean.com/v2/apps/$DO_APP_NAME/deployments" \
-            -H "Authorization: Bearer $DO_API_TOKEN"
-        env:
-          DO_API_TOKEN: ${{ secrets.DO_API_TOKEN }}
-          DO_APP_NAME: deploy_to_digitalocean
+       - name: DigitalOcean App Platform deployment
+         uses: digitalocean/app_action@v1.1.5 # This is the action
+         with:
+            app_name: seashell-app # Must be unique in DO
+            token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+            # branch: "master"
