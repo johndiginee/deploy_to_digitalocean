@@ -1,1 +1,1 @@
-# deploy_to_digitalocean
+# Deploy Django App to DigitalOcean App Platform via GitHub Actions 
