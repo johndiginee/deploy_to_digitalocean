@@ -8,7 +8,7 @@ jobs:
     strategy:
       max-parallel: 2
       matrix:
-        python-version: [3.11.0]
+        python-version: [3.11.0] # Change to your Python version
 
     steps:
       - uses: actions/checkout@v3
@@ -41,6 +41,6 @@ jobs:
        - name: DigitalOcean App Platform deployment
          uses: digitalocean/app_action@v1.1.5 # This is the action
          with:
-            app_name: seashell-app # Must be unique in DO
-            token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+            app_name: seashell-app # Change seashell-app to our Digital Ocean app name
+            token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }} # Set DIGITALOCEAN_ACCESS_TOKEN in Repository secrets
             # branch: "master"
